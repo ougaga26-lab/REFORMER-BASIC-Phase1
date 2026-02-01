@@ -184,42 +184,73 @@
 
   /* ─── OVERLAY (quiz) ─── */
   .overlay {
-    position:fixed; top:0; left:0; right:0; bottom:71px; /* bottom 留出 end-bar 空間 */
+    position:fixed; top:0; left:0; right:0; bottom:71px;
     background:rgba(0,0,0,.65);
     z-index:100; display:flex; align-items:flex-end; justify-content:center;
     opacity:0; pointer-events:none; transition:opacity .3s;
   }
   .overlay.open { opacity:1; pointer-events:auto; }
+
+  /* 收合狀態：遮光層透明 + pointer-events穿透，panel縮為頂部小條但自己可點 */
+  .overlay.collapsed {
+    opacity:1; pointer-events:none;
+    background:transparent;
+  }
+  .overlay.collapsed .quiz-panel {
+    transform:translateY(calc(100% - 34px));
+    pointer-events:auto;
+    border-radius:16px 16px 0 0;
+  }
+
   .quiz-panel {
     background:var(--surface); border-radius:20px 20px 0 0;
     width:100%; max-width:480px;
-    padding:24px 20px 32px;
+    padding:10px 20px 18px;
     transform:translateY(100%); transition:transform .38s cubic-bezier(.4,0,.2,1);
-    max-height:calc(100vh - 71px - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch;
+    max-height:calc(100vh - 71px - 20px); overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .overlay.open .quiz-panel { transform:translateY(0); }
-  .quiz-step-label { font-size:.64rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:8px; }
-  .quiz-question { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text); margin-bottom:18px; line-height:1.4; }
 
-  /* options */
-  .options { display:flex; flex-direction:column; gap:7px; }
+  /* 收合鍵 */
+  .quiz-collapse-btn {
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    width:100%; height:24px; margin-bottom:6px;
+    background:none; border:none; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .collapse-handle { width:32px; height:3px; background:var(--surface2); border-radius:2px; }
+  .collapse-arrow {
+    width:0; height:0;
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:4px solid var(--text-dim);
+    transition:transform .22s;
+  }
+  .overlay.collapsed .collapse-arrow { transform:rotate(180deg); }
+
+  .quiz-step-label { font-size:.64rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:5px; }
+  .quiz-step-label:empty { display:none; margin:0; }
+  .quiz-question { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text); margin-bottom:12px; line-height:1.4; }
+
+  /* options — 中英一行 */
+  .options { display:flex; flex-direction:column; gap:5px; }
   .option {
-    display:flex; align-items:center; gap:12px;
+    display:flex; align-items:center; gap:10px;
     background:var(--surface2); border:1px solid transparent;
-    border-radius:12px; padding:11px 14px;
+    border-radius:10px; padding:8px 12px;
     cursor:pointer; transition:border-color .18s, background .18s;
     user-select:none; -webkit-user-select:none;
     -webkit-tap-highlight-color:transparent;
   }
   .option:active { border-color:rgba(200,240,212,0.3); }
   .option .opt-key {
-    width:26px; height:26px; border-radius:7px;
+    width:24px; height:24px; border-radius:6px;
     background:var(--surface); border:1px solid var(--surface2);
     display:flex; align-items:center; justify-content:center;
-    font-size:.72rem; color:var(--text-dim); font-weight:500; flex-shrink:0;
+    font-size:.7rem; color:var(--text-dim); font-weight:500; flex-shrink:0;
   }
-  .option .opt-text { font-size:.84rem; color:var(--text); line-height:1.3; }
-  .option .opt-text-en { font-size:.68rem; color:var(--text-dim); margin-top:1px; }
+  /* 中英一行容器 */
+  .option .opt-label { font-size:.82rem; color:var(--text); line-height:1.35; flex:1; min-width:0; }
+  .option .opt-label .opt-en { color:var(--text-dim); font-size:.68rem; margin-left:4px; white-space:nowrap; }
 
   .option.correct-pick { border-color:var(--accent); background:var(--accent-dim); }
   .option.correct-pick .opt-key { background:var(--accent); color:var(--bg); border-color:transparent; }
@@ -229,7 +260,7 @@
   .option.wrong-pick.disabled { opacity:.6; }
 
   /* feedback */
-  .feedback { margin-top:12px; font-size:.78rem; color:var(--text-dim); min-height:20px; display:flex; align-items:center; gap:6px; opacity:0; transition:opacity .2s; }
+  .feedback { margin-top:8px; font-size:.76rem; color:var(--text-dim); min-height:18px; display:flex; align-items:center; gap:6px; opacity:0; transition:opacity .2s; }
   .feedback.show { opacity:1; }
 
 
@@ -326,7 +357,7 @@
      ═══════════════════════════════════════════════ -->
 <div class="page active" id="pageHome">
   <div class="home-header">
-    <h1>REFORMER-初級動作備考</h1>
+    <h1>REFORMER-初級</h1>
     <div class="subtitle">考驗你的記憶力!</div>
   </div>
   <div class="home-nav">
@@ -340,7 +371,7 @@
   <div id="startScreen">
     <div class="start-content">
       <h2>準備開始？</h2>
-      <p>依序背出所有REFORMER初級動作。先選動作名稱，再判斷是系列動作還是單一動作。系列動作還要依序選出每個次項目。</p>
+      <p>依序背出所有皮拉提斯動作。先選正確的動作名稱，再判斷是系列動作還是單一動作。系列動作還要依序選出每個次項目。</p>
       <button class="start-btn" onclick="chooseStart('full')">從頭開始</button>
       <button class="start-btn secondary" onclick="chooseStart('mid')">從中間開始</button>
     </div>
@@ -417,6 +448,10 @@
      ═══════════════════════════════════════════════ -->
 <div class="overlay" id="overlay">
   <div class="quiz-panel">
+    <button class="quiz-collapse-btn" onclick="toggleCollapse()">
+      <span class="collapse-handle"></span>
+      <span class="collapse-arrow"></span>
+    </button>
     <div class="quiz-step-label" id="quizStepLabel"></div>
     <div class="quiz-question" id="quizQuestion"></div>
     <div class="options" id="quizOptions"></div>
@@ -576,7 +611,11 @@ function rebuildChain(){
     html+=renderActiveCard(state.currentIdx)+`<div class="connector"><div class="connector-line"></div></div>`;
   }
   chain.innerHTML=html;
-  requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}));
+  // 捲動到當前最後一張card（配合收合後觀看）
+  requestAnimationFrame(()=>{
+    const lastCard=chain.querySelector('.card:last-of-type');
+    if(lastCard) lastCard.scrollIntoView({behavior:'smooth', block:'center'});
+  });
 }
 
 function renderDoneCard(idx){
@@ -608,10 +647,13 @@ function showMainQuiz(){
   const idx=state.currentIdx, correct=RAW[idx];
   const wrongs=shuffle(RAW.filter((_,i)=>i!==idx)).slice(0,4);
   const options=shuffle([correct,...wrongs]);
-  renderQuiz('STEP 1 — 選擇下一個動作','接下來應該是哪個動作？',
+  const isFirst=(idx===state.startIdx);
+  const stepLabel=isFirst?'':'STEP 1 — 選擇下一個動作';
+  const question=isFirst?'第一個動作是？':'接下來應該是哪個動作？';
+  renderQuiz(stepLabel,question,
     options.map(o=>({zh:o.main,en:o.mainEn})), correct.main,
     (ok)=>{
-      if(!ok){ recordError(idx,'main'); return; } // 錯誤：只記錄，UI 由 pickOption 處理
+      if(!ok){ recordError(idx,'main'); return; }
       state.phase='selectType'; rebuildChain();
       setTimeout(()=>{ showTypeQuiz(); openOverlay(); },420);
     }
@@ -652,7 +694,7 @@ function showSubQuiz(){
   const NONE_ITEM={zh:"該系列沒有其他動作了", en:"No other moves in this series"};
   const firstFour=shuffle([correctObj,...wrongs.slice(0,3)]);
   const options=[...firstFour, NONE_ITEM];
-  renderQuiz(`STEP 3 — 次項目 ${state.subIdx+1} / ${it.subs.length}`,`「${it.main}」的第 ${state.subIdx+1} 個動作是？`,
+  renderQuiz('',`「${it.main}」的第 ${state.subIdx+1} 個動作是？`,
     options.map(o=>({zh:o.zh,en:o.en})), correctObj.zh,
     (ok)=>{
       if(!ok){ recordError(state.currentIdx,'sub',state.subIdx); return; }
@@ -677,7 +719,7 @@ function renderQuiz(stepLabel,question,options,correctZh,onDone){
   document.getElementById('quizOptions').innerHTML=options.map((o,i)=>
     `<div class="option" id="opt-${i}" onclick="pickOption(${i})">
        <div class="opt-key">${keys[i]}</div>
-       <div><div class="opt-text">${o.zh}</div><div class="opt-text-en">${o.en}</div></div>
+       <div class="opt-label">${o.zh} <span class="opt-en">| ${o.en}</span></div>
      </div>`
   ).join('');
   document.getElementById('quizFeedback').className='feedback';
@@ -747,10 +789,35 @@ function finishCurrentItem(){
 }
 
 // ═══════════════════════════════════════════════════
-// OVERLAY
+// OVERLAY + 收合
 // ═══════════════════════════════════════════════════
-function openOverlay(){ document.getElementById('overlay').classList.add('open'); }
-function closeOverlay(){ document.getElementById('overlay').classList.remove('open'); }
+function openOverlay(){
+  const ov=document.getElementById('overlay');
+  // 先捲動到當前位置，讓收合後看見正確位置（3.4）
+  const chain=document.getElementById('chain');
+  const lastCard=chain.querySelector('.card:last-of-type');
+  if(lastCard){
+    lastCard.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  ov.classList.remove('collapsed');
+  ov.classList.add('open');
+}
+function closeOverlay(){
+  const ov=document.getElementById('overlay');
+  ov.classList.remove('open','collapsed');
+}
+function toggleCollapse(){
+  const ov=document.getElementById('overlay');
+  if(ov.classList.contains('collapsed')){
+    // 展開回來
+    ov.classList.remove('collapsed');
+    ov.classList.add('open');
+  } else {
+    // 收合：遮光消失，panel縮為小條，觸摸穿透背後
+    ov.classList.remove('open');
+    ov.classList.add('collapsed');
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // HISTORY
